@@ -1,0 +1,58 @@
+<?php
+$viewModel = $block->getViewModel();
+$udrawData = $viewModel->getUdrawData();
+?>
+
+<section class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title">uDraw Order Information</span>
+    </div>
+    <div class="admin__table-wrapper">
+        <table class="data-table admin__table-primary edit-order-table">
+            <thead>
+                <tr class="heading">
+                    <th class="col-product"><span>Product Preview</span></th>
+                    <th class="col-product"><span>Actions</span></th>
+                </tr>
+            </thead>
+            <tbody class="even">
+            <?php foreach ($udrawData as $udrawDataItem) { ?>
+                <?php
+                if (!key_exists('udraw_data', $udrawDataItem)) {
+                    continue;
+                }
+                if (!key_exists('udraw_designer_data', $udrawDataItem['udraw_data'])) {
+                    continue;
+                }
+                ?>
+
+                <?php if (!is_null($udrawDataItem['udraw_designer_preview'])) { ?>
+                    <tr>
+                        <td class="col-product">
+                            <span><?=$udrawDataItem['product_name']?></span><br />
+                            <?php
+                            echo "<img class='udraw-image-preview' src='" . $viewModel->getUdrawBaseApiUrl() . $udrawDataItem['udraw_data']['udraw_designer_data']->preview . "' />"; ?>
+                        </td>
+                        <td class="col-product"><span><a style="padding:5px; background-color: #007dbd; border-color: #007dbd; color: #ffffff; white-space: nowrap; font-weight: bold;" href="<?=$udrawDataItem['udraw_data']['udraw_designer_print']; ?>" target="_blank" download>Download Artwork</a></span></td>
+                    </tr>
+                <?php } ?>
+
+                <?php if (!is_null($udrawDataItem['udraw_gosendex_uploaded_artwork'])) { ?>
+                    <tr>
+                        <td class="col-product">
+                            <span><?=$udrawDataItem['udraw_gosendex_uploaded_artwork']->filename ?></span><br />
+                        </td>
+                        <td class="col-product"><span><a style="padding:5px; background-color: #007dbd; border-color: #007dbd; color: #ffffff; white-space: nowrap; font-weight: bold;" href="<?=$udrawDataItem['udraw_gosendex_uploaded_artwork']->download ?>" target="_blank" download>Download Artwork</a></span></td>
+                    </tr>
+                <?php } ?>
+            <?php } ?>
+            </tbody>
+        </table>
+    </div>
+    <style>
+        .udraw-image-preview {
+            max-height: 100px;
+            border: #d7d7d7 1px solid;
+        }
+    </style>
+</section>

@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="racadtech_udraw_settings" resource="default" engine="innodb" comment="uDraw Settings Table">
+        <column name="udraw_settings_id" xsi:type="int" identity="true" nullable="false" comment="Setting Id" />
+        <column name="name" xsi:type="varchar" length="255" nullable="false" comment="Setting Name" />
+        <column name="value" xsi:type="text" nullable="false" comment="Setting Value" />
+        <column name="label" xsi:type="varchar" length="255" nullable="true" comment="Setting Label" />
+        <column name="section" xsi:type="varchar" length="255" nullable="true" comment="Settings Section Name" />
+        <column name="control_type" xsi:type="varchar" length="50" nullable="true" comment="Settings Control Type" />
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="udraw_settings_id"/>
+        </constraint>
+    </table>
+
+    <table name="racadtech_udraw_templates" resource="default" engine="innodb" comment="uDraw Templates Table">
+        <column name="udraw_template_id" xsi:type="int" identity="true" nullable="false" comment="Template Id" />
+        <column name="access_key" xsi:type="varchar" length="255" nullable="false" comment="Public Access Key" />
+        <column name="name" xsi:type="varchar" length="255" nullable="false" comment="Template Name" />
+        <column name="design" xsi:type="text" nullable="false" comment="Design Data" />
+        <column name="design_cropped" xsi:type="text" nullable="false" comment="Cropped Design Data" />
+        <column name="preview" xsi:type="text" nullable="true" comment="Preview Data" />
+        <column name="design_width" xsi:type="varchar" length="25" nullable="true" comment="Design Width" />
+        <column name="design_height" xsi:type="varchar" length="25" nullable="true" comment="Design Height" />
+        <column name="design_pages" xsi:type="int" nullable="true" comment="Number Of Pages" />
+        <column name="create_user" xsi:type="varchar" length="255" nullable="false" comment="Creation User" />
+        <column name="create_time" xsi:type="timestamp" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Design Creation Time"/>
+        <column name="update_time" xsi:type="timestamp" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Design Modification Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="udraw_template_id"/>
+        </constraint>
+        <index referenceId="UDRAW_TEMPLATES_NAME" indexType="fulltext">
+            <column name="name"/>
+        </index>
+    </table>
+
+    <table name="racadtech_udraw_pricematrix" resource="default" engine="innodb" comment="uDraw PriceMatrix Table">
+        <column name="udraw_pricematrix_id" xsi:type="int" identity="true" nullable="false" comment="PriceMatrix Id" />
+        <column name="name" xsi:type="varchar" length="255" nullable="false" comment="PriceMatrix Name" />
+        <column name="price_data" xsi:type="text" nullable="false" comment="Pricing Data" />
+        <column name="access_key" xsi:type="varchar" length="255" nullable="false" comment="Public Access Key" />
+        <column name="measurement" xsi:type="varchar" length="50" nullable="false" default="in" comment="Unit Of Measurement" />
+        <column name="create_user" xsi:type="varchar" length="255" nullable="false" comment="Creation User" />
+        <column name="create_time" xsi:type="timestamp" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Design Creation Time"/>
+        <column name="update_time" xsi:type="timestamp" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Design Modification Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="udraw_pricematrix_id"/>
+        </constraint>
+        <index referenceId="UDRAW_PRICEMATRIX_ACCESS_KEY" indexType="btree">
+            <column name="access_key"/>
+        </index>
+        <index referenceId="UDRAW_PRICEMATRIX_NAME_ACCESS_KEY_CREATE_USER" indexType="fulltext">
+            <column name="name"/>
+            <column name="create_user"/>
+            <column name="access_key"/>
+        </index>
+    </table>
+    <table name="quote_item" resource="checkout" comment="Sales Flat Quote Item">
+        <column name="udraw_data" xsi:type="text" nullable="true" comment="uDraw Data" />
+    </table>
+    <table name="sales_order_item" resource="sales" comment="Sales Flat Order Item">
+        <column name="udraw_data" xsi:type="text" nullable="true" comment="uDraw Data" />
+    </table>
+</schema>

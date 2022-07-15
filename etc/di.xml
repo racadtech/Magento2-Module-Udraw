@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\App\Action\AbstractAction">
+        <plugin name="udraw_customer_session_data_to_context" type="Racadtech\Udraw\Plugin\CustomerSessionContext" sortOrder="15"/>
+    </type>
+    <type name="Magento\Checkout\Block\Cart\Item\Renderer">
+        <plugin name="udraw_checkout_product_main_item_image" type="Racadtech\Udraw\Plugin\Cart\Image" sortOrder="10"/>
+    </type>
+    <type name="Magento\Checkout\Model\Cart\ImageProvider">
+        <plugin name="udraw_checkout_cart_image_provider" type="Racadtech\Udraw\Plugin\Cart\Image" sortOrder="15"/>
+    </type>
+    <type name="Magento\Checkout\CustomerData\AbstractItem">
+        <plugin name="udraw_change_product_image_in_mini_cart" type="Racadtech\Udraw\Plugin\Cart\Image" sortOrder="15" />
+    </type>
+    <type name="Magento\Directory\Model\PriceCurrency">
+        <plugin name="udraw_round_price" type="Racadtech\Udraw\Plugin\Directory\PriceCurrency" sortOrder="15" />
+    </type>
+    <type name="Magento\Quote\Model\Quote\Item\AbstractItem">
+        <plugin name="udraw_calculate_totals" type="Racadtech\Udraw\Plugin\Quote\Item\AbstractItem" sortOrder="80" />
+    </type>
+    <type name="Magento\Sales\Controller\AbstractController\Reorder">
+        <plugin name="udraw_sales_reorder" type="Racadtech\Udraw\Plugin\Sales\Order\Reorder" sortOrder="15" />
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="udraw_pricematrix_listing_data_source" xsi:type="string">Racadtech\Udraw\Model\ResourceModel\Pricematrix\Grid\Collection</item>
+                <item name="udraw_templates_listing_data_source" xsi:type="string">Racadtech\Udraw\Model\ResourceModel\Templates\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Racadtech\Udraw\Model\ResourceModel\Pricematrix\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">racadtech_udraw_pricematrix</argument>
+            <argument name="resourceModel" xsi:type="string">Racadtech\Udraw\Model\ResourceModel\Pricematrix</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Racadtech\Udraw\Model\ResourceModel\Templates\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">racadtech_udraw_templates</argument>
+            <argument name="resourceModel" xsi:type="string">Racadtech\Udraw\Model\ResourceModel\Templates</argument>
+        </arguments>
+    </virtualType>
+</config>

@@ -1,0 +1,428 @@
+<?php $goSendExInstance = $block->getGoSendExInstance(); ?>
+
+<?php if ($block->containsUdrawTemplate() || $block->containsPriceMatrix() || $goSendExInstance["enabled"]) { ?>
+    <script type="text/javascript">
+        function utf8_to_b64( str ) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+                function toSolidBytes(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                })
+            );
+        }
+
+        function getAddToCartElement() {
+            <?php if ($block->isUpdate()) { ?>
+            return jQuery('#product-updatecart-button');
+            <?php } else { ?>
+            return jQuery('#product-addtocart-button');
+            <?php } ?>
+        }
+
+        function getDesignNowButtonId() {
+            return 'udraw-designer-design-now-btn';
+        }
+        function getDesignNowButtonElement() {
+            return jQuery('#' + getDesignNowButtonId());
+        }
+    </script>
+<?php } ?>
+
+<?php if ($block->containsUdrawTemplate()) { ?>
+    <div id="udraw-connect-container" style="display: none;">
+    </div>
+    <input type="hidden" id="udraw_designer_data" name="udraw_designer_data" value="<?=($block->isUpdate()) ? $block->getCartUdrawData()['udraw_designer_data'] : "";?>" />
+
+    <script type="text/javascript">
+        require(['jquery', 'https://udraw-app.racadtech.com/includes/js/udraw-connect.min.js'],function($) {
+            $(document).ready(function() {
+                uDrawConnect.init({
+                    apiKey: '<?=$block->getUdrawApiKey(); ?>',
+                    authToken: '<?=$block->generateAuthToken(); ?>',
+                    environment: 'udraw-app.racadtech.com',
+                    element: 'udraw-connect-container',
+                    components: 'basic|shapes|layers<?php if ($block->containsPriceMatrix()) {?>|pricematrix<?php }?>',
+                    designKey: '<?=$block->getUdrawTemplateDesignKey(); ?>',
+                    designName: '<?=str_replace(['"',"'"], "", $block->getTemplateInstance()->getName()); ?>',
+                    css: window.location.origin + '/udraw/designer/asset/type/css',
+                    js: window.location.origin + '/udraw/designer/asset/type/js',
+                    ui: '<?=$block->getUdrawDesignerUI(); ?>',
+                    isUpdate: <?=($block->isUpdate()) ? 'true' : 'false'; ?>,
+                    initSettings: uDrawInitSettings,
+                    initHandlerActions: uDrawInitHandlerActions,
+                    onLoad: uDrawConnectLoaded,
+                    onDesignSaved: uDrawConnectDesignSaved,
+                    onDesignLoaded: uDrawConnectDesignLoaded,
+                    <?php if ($block->containsPriceMatrix()) {?>
+                    pricematrix: {
+                        src: window.location.origin + '/udraw/pricematrix/asset/access_key/<?=$block->getPricematrixInstance()->getAccessKey();?>',
+                        qty: 0,
+                        preload: []
+                    },
+                    onPriceMatrixUpdated: uDrawPriceMatrixUpdated,
+                <?php } ?>
+                    topToolbarButtons: {
+                        additionalButtons: [
+                            {
+                                id: 'udraw-connect-designer-back-btn',
+                                label: 'Back',
+                                icon: 'fas fa-arrow-left',
+                                class: 'udraw-connect-designer-back-btn',
+                                callback: "uDrawConnectTopToolbarBtnEvent"
+                            }
+                        ]
+                    }
+                });
+            });
+
+            let addToCardElement = getAddToCartElement();
+            let designNowButton = jQuery('<button>').attr({
+                id: getDesignNowButtonId(),
+                class: 'action primary tocart button red large full',
+                style: 'display: none;'
+            }).appendTo(addToCardElement.parent());
+
+            <?php if ($block->isUpdate()) { ?>
+            $('<span>').text('<?= __('Update Design') ?>').appendTo(designNowButton);
+            <?php } else { ?>
+            $('<span>').text('<?= __('Design Now') ?>').appendTo(designNowButton);
+            <?php } ?>
+            addToCardElement.hide();
+
+            getDesignNowButtonElement().on('click', function(e) {
+                e.preventDefault();
+                if (typeof validateRequiredFields == 'function') {
+                    if (validateRequiredFields()) {
+                        displayUdrawDesigner();
+                    } else {
+                        alert('<?= __('Please fill in all required fields(*) before proceeding.') ?>');
+                    }
+                } else {
+                    displayUdrawDesigner();
+                }
+            });
+
+        });
+
+        function uDrawConnectTopToolbarBtnEvent(elementId) {
+            if (elementId === 'udraw-connect-designer-back-btn') {
+                hideUdrawDesigner();
+            }
+        }
+
+        function uDrawPriceMatrixUpdated(event) {
+            if (typeof __update_price_matrix_data == "function") {
+                selectedPMOptions = event.selectedOptions;
+                updateSelectedPMOptions(selectedPMOptions);
+                __update_price_matrix_data(event.price, event.qty,
+                    utf8_to_b64(JSON.stringify(selectedPMOptions)), btoa(JSON.stringify(event.selectedSave)),
+                    btoa(JSON.stringify(priceMatrixObj.getAllPrices())) );
+            }
+        }
+
+        function uDrawInitSettings(settings) {
+            let designerUi = '<?=$block->getUdrawDesignerUI(); ?>';
+            if (designerUi !== '' && designerUi !== 'default') {
+                settings.language = '<?=$block->getStoreLocale(); ?>';
+                settings.localesPath = "/includes/"+ designerUi + "/locales/";
+            }
+            uDrawConnect.initSettings(settings);
+        }
+
+        function uDrawInitHandlerActions(actions) {
+            // If any custom actions need to be applied, you must call ` uDrawConnect.initHandlerActions(actions); `.
+            //uDrawConnect.initHandlerActions(actions);
+        }
+
+        function uDrawConnectLoaded(settings) {
+            let displayDesignerFirst = '<?= $block->displayDesignerFirst(); ?>';
+            let isDesignUpdateRequest = '<?= $block->isUpdate(); ?>';
+            if (displayDesignerFirst === '1' || isDesignUpdateRequest === '1') {
+                setTimeout(function() {
+                    displayUdrawDesigner();
+                }, 500);
+            }
+        }
+
+        function uDrawConnectDesignSaved(event) {
+            getDesignNowButtonElement().hide();
+            hideUdrawDesigner();
+            jQuery('input[name="udraw_designer_data"]').val(btoa(JSON.stringify(event)));
+            jQuery('#udraw_designer_data').parent('form').submit();
+            setTimeout(function() {
+                uDrawConnect.loadDesignKey('<?=$block->getUdrawTemplateDesignKey(); ?>', false);
+            }, 3000);
+        }
+
+        function uDrawConnectDesignLoaded(event) {
+            getDesignNowButtonElement().show();
+            jQuery('#' + getDesignNowButtonId() + ' > span').text('<?= __('Design Now') ?>');
+        }
+
+        function displayUdrawDesigner() {
+            window.scrollTo(0,0);
+            jQuery('#udraw-connect-container').fadeIn();
+            jQuery('body').css('overflow', 'hidden');
+        }
+
+        function hideUdrawDesigner() {
+            jQuery('body').css('overflow', 'initial');
+            jQuery('#udraw-connect-container').hide();
+        }
+
+        <?=$block->getDesignerCustomJS()?>
+    </script>
+
+    <style>
+        #udraw-connect-container {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            top: 0;
+            z-index: 1001;
+        }
+        #udraw-connect-container iframe {
+            height: 100vh !important;
+        }
+    </style>
+<?php } ?>
+
+<?php if ($block->containsPriceMatrix()) { ?>
+
+    <input type="hidden" id="udraw_pricematrix_price" name="udraw_pricematrix_price" value="" />
+    <input type="hidden" id="udraw_pricematrix_selected_options" name="udraw_pricematrix_selected_options" value="" />
+    <input type="hidden" id="udraw_pricematrix_selected_saved" name="udraw_pricematrix_selected_saved" value="" />
+    <input type="hidden" id="udraw_pricematrix_qty" name="udraw_pricematrix_qty" value="" />
+    <input type="hidden" id="udraw_pricematrix_price_breaks" name="udraw_pricematrix_price_breaks" value="" />
+    <input type="hidden" id="udraw_pricematrix_default_sku" name="udraw_pricematrix_default_sku" value="" />
+    <input type="hidden" id="udraw_pricematrix_product_preview" name="udraw_pricematrix_product_preview" value="" />
+    <div class="container price-matrix-container">
+        <div class="row">
+            <div class="preview_container">
+                <div id="canvas" class="divCanvas"></div>
+                <div id="divSettings" class="divSettings"></div>
+                <?=$block->generatePriceMatrixQtyBreakDropdown(); ?>
+                <div style="float:right; padding-top: 15px; display: none;">
+                    <strong style="font-size:12pt;">Total Price:</strong>
+                    <span style="font-size: 22pt;color: rgb(0, 128, 0);font-weight: bold;">
+                    <span id="totalPrice"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        require(['jquery',
+            'https://udraw-app.racadtech.com/includes/js/pm/price-matrix.js',
+            'https://udraw-app.racadtech.com/includes/js/pm/udraw-price-matrix.js'
+        ],function($) {
+            //getPriceSelector().hide();
+            getQuantitySelector().hide();
+
+            $(document).ready(function() {
+                setTimeout(function() {
+                    display_udraw_price_matrix_preview();
+
+                    // Set Event for Qty Break Select
+                    jQuery('select[name="pm-quantity-breaks"]').on('change', function() {
+                        jQuery('#txtQty').val(jQuery(this).find(":selected").data('qty')).trigger('change');
+                    });
+
+                    jQuery(document).on('udraw_price_matrix_preview_selected', function(e) {
+                        if (typeof (e.preview !== 'undefined')) {
+                            jQuery('input[name="udraw_pricematrix_product_preview"]').val(e.preview);
+                        }
+                    });
+
+                    getAddToCartElement().off('click');
+                    getAddToCartElement().on('click', function(e) {
+                        e.preventDefault();
+                        if (typeof validateRequiredFields == 'function') {
+                            if (validateRequiredFields()) {
+                                getAddToCartElement().closest('form').submit()
+                            } else {
+                                alert('<?= __('Please fill in all required fields(*) before proceeding.') ?>');
+                            }
+                        } else {
+                            getAddToCartElement().closest('form').submit();
+                        }
+                    });
+                }, 50);
+            });
+        });
+
+        let json, bs, selectedDefault, selectedByUser, eFileName = "";
+        let selectedSaved = <?=($block->isUpdate()) ? "JSON.parse(" . $block->getCartPriceMatrixSaved() . ");" : '[];'; ?>
+        let selectedOutput = '';
+        let measurement_unit_label = '<?=$block->getPricematrixInstance()->getMeasurement();?>';
+        let priceMatrixObj;
+        let currencySymbol = '<?=$block->getPriceCurrencySymbol();?>';
+
+        function display_udraw_price_matrix_preview() {
+            priceMatrixObj = PriceMatrix({
+                url: '/udraw/pricematrix/asset/access_key/<?=$block->getPricematrixInstance()->getAccessKey();?>',
+                key: '<?=$block->generateAuthToken();?>',
+                useJWTAuth: true,
+                jwtPublicKey: '<?=$block->getUdrawApiKey();?>',
+                callback: function (obj) {
+                    json = priceMatrixObj.getFields();
+                    bs = json;
+                    AddSettings();
+                    selectedDefault = (selectedSaved.length > 0) ? selectedSaved : priceMatrixObj.getDataDefaults();
+                    selectedByUser = (selectedSaved.length > 0) ? selectedSaved : selectedDefault;
+                    <?php if ($block->isUpdate()) { ?>
+                    if (jQuery('#txtQty').is('input')) {
+                        jQuery('#txtQty').val('<?=$block->getCartPriceMatrixSavedQty();?>');
+                    } else {
+                        jQuery("#txtQty option[value='<?=$block->getCartPriceMatrixSavedQty();?>']").prop('selected', "selected");
+                    }
+                    setTimeout(function() { jQuery('#txtQty').trigger('change'); }, 1000);
+                    <?php } ?>
+                    DisplayFieldsJSON(true);
+
+                    // Update Qty Label
+                    jQuery('#spanQty .fieldlabel').html(
+                        jQuery('#spanQty .fieldlabel').html().replace('Quantity', '<?= __('Quantity') ?>')
+                    )
+
+                    // Send initial price matrix data to designer ( if exists )
+                    __update_designer_price_matrix_data();
+                }
+            });
+        }
+
+        function __display_price_callback(response) {
+            updateSelectedPMOptions(selectedPMOptions);
+            __update_price_matrix_data(response.Price, jQuery('#txtQty').val(),
+                utf8_to_b64(JSON.stringify(selectedPMOptions)), btoa(JSON.stringify(selectedSaved)),
+                btoa(JSON.stringify(priceMatrixObj.getAllPrices())));
+
+            __update_designer_price_matrix_data();
+        }
+
+        function __update_designer_price_matrix_data() {
+            <?php if ($block->containsUdrawTemplate()) { ?>
+            uDrawConnect.setPriceMatrixData(jQuery('#txtQty').val(), selectedSaved, currencySymbol);
+            <?php } ?>
+        }
+
+        function __update_price_matrix_data(price, qty, selectedOptions, selectedSaved, priceBreaks) {
+            let displayedPrice = '<?= __('{currency}{price}'); ?>'
+                .replace('{currency}', currencySymbol)
+                .replace('{price}', (parseFloat(price).toFixed(2)));
+
+            let decimalSeparator = '<?=__(".");?>';
+            displayedPrice = displayedPrice.replace('.', decimalSeparator);
+
+            getPriceSelector(true).text(displayedPrice);
+            getPriceSelector(false).text(displayedPrice); // Without Tax - TODO
+            jQuery('input[name="udraw_pricematrix_price"]').val(price);
+            jQuery('input[name="udraw_pricematrix_qty"]').val(qty);
+            jQuery('input[name="udraw_pricematrix_selected_options"]').val(selectedOptions);
+            jQuery('input[name="udraw_pricematrix_selected_saved"]').val(selectedSaved);
+            jQuery('input[name="udraw_pricematrix_price_breaks"]').val(priceBreaks);
+        }
+
+        function getPriceSelector(TaxIncluded) {
+            let $priceSelector = jQuery('[data-price-type="basePrice"] .price:first');
+
+            // When only one price is displayed, Magento uses only finalPrice container (US)
+            if ($priceSelector.length < 1 || TaxIncluded) {
+                $priceSelector = jQuery('[data-price-type="finalPrice"] .price:first');
+            }
+
+            return $priceSelector;
+        }
+
+        function getQuantitySelector() {
+            return jQuery('#qty').parent().parent();
+        }
+
+        function updateSelectedPMOptions() {
+            if (typeof selectedPMOptions == 'object') {
+                for (let x = 0; x < selectedPMOptions.length; x++) {
+                    selectedPMOptions[x].price_name = __getPriceNameFromSelectedOption(selectedPMOptions[x].name, selectedPMOptions[x].value);
+                }
+            }
+        }
+
+        function validateRequiredFields() {
+            let _fields_validation = true;
+            jQuery('.price-matrix-container input:required, .price-matrix-container select:required, .price-matrix-container textarea:required').each(function() {
+                if (typeof jQuery(this) !== 'undefined') {
+                    if (jQuery(this).attr('data-control-type') === 'pm_dropdown') {
+                        if (typeof jQuery(this).attr('data-placeholder') !== 'undefined') {
+                            let selectVal = jQuery(this).find('option:selected').text().toLowerCase();
+                            let placeValue = jQuery(this).attr('data-placeholder').toLowerCase();
+                            if (selectVal === placeValue) {
+                                _fields_validation = false;
+                            }
+                        }
+                    } else {
+                        if (jQuery(this).val().length === 0) {
+                            _fields_validation = false;
+                        }
+                    }
+
+                    if (!_fields_validation) { return false; } // break out of each loop.
+                }
+            });
+            return _fields_validation;
+        }
+
+        function __getPriceNameFromSelectedOption(optionName, optionValue) {
+            let _fieldObj = priceMatrixObj.getFields().FieldObjs.filter(f => f.OptionObjs).filter(o => o.FieldText === optionName);
+            if (typeof _fieldObj == 'object') {
+                if (_fieldObj.length > 0) {
+                    let _optionObj = _fieldObj[0].OptionObjs.filter(o => o.Text === optionValue);
+                    if (typeof _optionObj == 'object') {
+                        if (_optionObj.length > 0) {
+                            return _optionObj[0].PricesName
+                        }
+                    }
+                }
+            }
+            return "";
+        }
+
+        <?=$block->getPriceMatrixCustomJS()?>
+    </script>
+
+    <style>
+        .price-matrix-container {
+            padding-bottom: 10px;
+        }
+        <?=$block->getPriceMatrixCustomCSS()?>
+    </style>
+    <link  rel="stylesheet" type="text/css" href="https://udraw-app.racadtech.com/includes/js/pm/price-matrix.css" />
+<?php } ?>
+
+<?php if ($goSendExInstance["enabled"]) { ?>
+    <div id="gosendex-upload-container"></div>
+    <input type="hidden" id="udraw_gosendex_uploaded_artwork" name="udraw_gosendex_uploaded_artwork" value="" />
+    <script type="text/javascript">
+        require(['jquery',
+            'https://racadtech.gosendex.com/partner/gosendex-embed.min.js'
+        ],function($) {
+            $(document).ready(function() {
+                GoSendEx({
+                    organization: '<?=$goSendExInstance["domain"]?>',
+                    key: '<?=$goSendExInstance["apikey"]?>',
+                    element: 'gosendex-upload-container',
+                    mode: 'attach',
+                    css: window.location.origin + '/udraw/pricematrix/asset/type/css',
+                    label: '<?= __('Upload Artwork') ?>',
+                    onUploadComplete: function(response) {
+                        <?php if ($block->containsUdrawTemplate()) { ?>
+                            getDesignNowButtonElement().hide();
+                        <?php } ?>
+                        getAddToCartElement().show();
+                        jQuery('input[name="udraw_gosendex_uploaded_artwork"]').val(
+                            utf8_to_b64(JSON.stringify(response[0]))
+                        );
+                    }
+                });
+            });
+        });
+    </script>
+<?php } ?>

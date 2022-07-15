@@ -1,0 +1,91 @@
+<link  rel="stylesheet" type="text/css" href="https://udraw-app.racadtech.com/includes/js/pm/price-matrix.css" />
+
+<div class="container">
+    <div class="row">
+        <div name="pricematrix_editor" id="pricematrix_editor" style="position: relative;width: auto;height: 500px;"></div>
+    </div>
+    <div class="row">
+        <div class="preview_container">
+            <h1>Preview</h1>
+            <hr />
+            <div id="canvas" class="divCanvas"></div>
+            <div id="divSettings" class="divSettings"></div>
+            <div style="float:right; padding-top: 15px;">
+                <strong style="font-size:12pt;">Total Price:</strong>
+                <span style="font-size: 22pt;color: rgb(0, 128, 0);font-weight: bold;">
+            <span>$</span><span id="totalPrice"></span>
+            </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+let udraw_pricematrix_editor;
+function utf8_to_b64( str ) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        })
+    );
+}
+require(['jquery',
+         'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.js',
+         'https://udraw-app.racadtech.com/includes/js/pm/price-matrix.js',
+         'https://udraw-app.racadtech.com/includes/js/pm/udraw-price-matrix.js'
+        ],function($) {
+    $(document).ready(function() {
+        setTimeout(function() {
+            udraw_pricematrix_editor = ace.edit("pricematrix_editor");
+            udraw_pricematrix_editor.setTheme("ace/theme/monokai");
+            //editor.setTheme("ace/theme/chrome");
+            udraw_pricematrix_editor.getSession().setMode("ace/mode/xml");
+            udraw_pricematrix_editor.setValue(jQuery("#udraw_pricematrix_price_data").val());
+            udraw_pricematrix_editor.resize();
+
+            <?php if ($block->isEditMode()) { ?>
+                display_udraw_price_matrix_preview();
+            <?php } ?>
+        }, 50);
+
+        $('#save').on('click', function (){
+            jQuery('#udraw_pricematrix_price_data').val(utf8_to_b64(udraw_pricematrix_editor.getValue()));
+
+            jQuery('#udraw_pricematrix_edit_form').submit();
+        });
+    });
+});
+
+<?php if ($block->isEditMode()) { ?>
+var json, bs, selectedDefault, selectedByUser, eFileName = "";
+var selectedSaved = [];
+var selectedOutput = '';
+var measurement_unit_label = '<?=$block->getPricematrixInstance()->getMeasurement();?>';
+var priceMatrixObj;
+
+function display_udraw_price_matrix_preview() {
+    priceMatrixObj = PriceMatrix({
+        url: '/udraw/pricematrix/asset/access_key/<?=$block->getPricematrixInstance()->getAccessKey();?>',
+        key: '<?=$block->generateAuthToken();?>',
+        useJWTAuth: true,
+        jwtPublicKey: '<?=$block->getUdrawApiKey();?>',
+        callback: function (obj) {
+            json = priceMatrixObj.getFields();
+            bs = json;
+            AddSettings();
+            selectedDefault = priceMatrixObj.getDataDefaults();
+            selectedByUser = selectedDefault;
+            DisplayFieldsJSON(true);
+        }
+    });
+}
+<?php } ?>
+
+</script>
+<style media="screen">
+    #pricematrix_editor {
+        position: relative;
+        width: 100%;
+        height: 500px;
+    }
+</style>

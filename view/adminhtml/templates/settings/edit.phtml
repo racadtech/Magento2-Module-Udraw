@@ -1,0 +1,42 @@
+<script>
+    let udraw_custom_designer_js;
+    let udraw_custom_designer_css;
+    let udraw_custom_pricematrix_js;
+    let udraw_custom_pricematrix_css;
+
+    require(['jquery','https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/ace.js'],function($) {
+        $(document).ready(function() {
+            setTimeout(function() {
+                udraw_custom_designer_js = createAceEditorInstance(jQuery('#custom_designer_js'), 'javascript');
+                udraw_custom_designer_css = createAceEditorInstance(jQuery('#custom_designer_css'), 'css');
+                udraw_custom_pricematrix_js = createAceEditorInstance(jQuery('#custom_pricematrix_js'), 'javascript');
+                udraw_custom_pricematrix_css = createAceEditorInstance(jQuery('#custom_pricematrix_css'), 'css');
+            }, 50);
+            $('#save').on('click', function (){
+                jQuery('#custom_designer_js').val(btoa(udraw_custom_designer_js.getValue()));
+                jQuery('#custom_designer_css').val(btoa(udraw_custom_designer_css.getValue()));
+                jQuery('#custom_pricematrix_js').val(btoa(udraw_custom_pricematrix_js.getValue()));
+                jQuery('#custom_pricematrix_css').val(btoa(udraw_custom_pricematrix_css.getValue()));
+                jQuery('#udraw_settings_edit_form').submit();
+            });
+        });
+
+        function createAceEditorInstance(element, mode) {
+            element.hide();
+            let ace_editor_instance;
+            let designer_js_editor = $('<div>', {
+                position: 'relative',
+                width: '100%',
+                height: 300,
+                'class': element.attr('class')
+            }).insertBefore(element);
+
+            ace_editor_instance = ace.edit(designer_js_editor[0]);
+            ace_editor_instance.getSession().setMode("ace/mode/" + mode);
+            ace_editor_instance.setValue(atob(element.val()));
+            ace_editor_instance.resize();
+
+            return ace_editor_instance;
+        }
+    });
+</script>

@@ -1,0 +1,57 @@
+{
+    "racadtech_udraw_settings": {
+        "column": {
+            "udraw_settings_id": true,
+            "name": true,
+            "value": true,
+            "label": true,
+            "section": true,
+            "control_type": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "racadtech_udraw_templates": {
+        "column": {
+            "udraw_template_id": true,
+            "name": true,
+            "design": true,
+            "preview": true,
+            "design_width": true,
+            "design_height": true,
+            "design_pages": true,
+            "create_user": true,
+            "create_time": true,
+            "update_time": true,
+            "access_key": true,
+            "design_cropped": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        },
+        "index": {
+            "RACADTECH_UDRAW_TEMPLATES_NAME": true
+        }
+    },
+    "racadtech_udraw_pricematrix": {
+        "column": {
+            "udraw_pricematrix_id": true,
+            "name": true,
+            "price_data": true,
+            "access_key": true,
+            "measurement": true,
+            "create_user": true,
+            "create_time": true,
+            "update_time": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        },
+        "index": {
+            "RACADTECH_UDRAW_PRICEMATRIX_ACCESS_KEY": true,
+            "RACADTECH_UDRAW_PRICEMATRIX_NAME_ACCESS_KEY": true,
+            "RACADTECH_UDRAW_PRICEMATRIX_NAME_CREATE_USER_ACCESS_KEY": true
+        }
+    }
+}

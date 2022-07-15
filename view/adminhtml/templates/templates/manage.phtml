@@ -1,0 +1,102 @@
+<div id="udraw-connect-container">
+</div>
+<form id="udraw-form-data" action="<?=$block->getUrl('udraw/templates/save', ['form_key' => $block->getFormKey()]);?>" method="POST">
+    <?php if ($block->isEditMode()) { ?>
+        <input type="hidden" name="access_key" value="<?=$block->getTemplateInstance()->getAccessKey()?>" />
+    <?php } else { ?>
+        <input type="hidden" name="access_key" value="" />
+    <?php } ?>
+</form>
+
+<script type="text/javascript">
+
+    require(['jquery', 'https://udraw-app.racadtech.com/includes/js/udraw-connect.min.js'],function($) {
+        $(document).ready(function() {
+            uDrawConnect.init({
+                apiKey: '<?=$block->getUdrawApiKey(); ?>',
+                authToken: '<?=$block->generateAuthToken(); ?>',
+                environment: 'udraw-app.racadtech.com',
+                element: 'udraw-connect-container',
+                components: 'basic|shapes|layers|designer',
+                <?php if ($block->isEditMode()) { ?>
+                designKey: '<?=$block->getTemplateInstance()->getAccessKey()?>',
+                designName: '<?=str_replace(['"',"'"], "", $block->getTemplateInstance()->getName()); ?>',
+                <?php } ?>
+                initSettings: uDrawInitSettings,
+                initHandlerActions: uDrawInitHandlerActions,
+                onLoad: uDrawConnectLoaded,
+                onDesignSaved: uDrawConnectDesignSaved,
+                onDesignLoaded: uDrawConnectDesignLoaded,
+                topToolbarButtons: {
+                    mainButton: {
+                        label: "Save & Continue",
+                        icon: "far fa-save"
+                    },
+                    additionalButtons: [
+                        {
+                            id: "udraw-save-and-close-btn",
+                            label: "Save & Close",
+                            icon: "far fa-save",
+                            class: "udraw-save-and-close-btn",
+                            callback: "udrawConnectSaveAndClose"
+                        }
+                    ]
+                }
+            });
+        })
+    });
+
+    let udrawSaveAndClose = false;
+
+    function uDrawInitSettings(settings) {
+        //console.log('Init Settings');
+
+        // If any settings need to be applied, you must call ` uDrawConnect.initSettings(settings); `.
+        //uDrawConnect.initSettings(settings);
+    }
+
+    function uDrawInitHandlerActions(actions) {
+        // If any custom actions need to be applied, you must call ` uDrawConnect.initHandlerActions(actions); `.
+        //uDrawConnect.initHandlerActions(actions);
+    }
+
+    function uDrawConnectLoaded(settings) {
+        //console.log('uDraw Loaded');
+    }
+
+    function udrawConnectSaveAndClose() {
+        udrawSaveAndClose = true;
+        uDrawConnect.saveDesign();
+    }
+
+    function uDrawConnectDesignSaved(event) {
+        console.log(event);
+        if (udrawSaveAndClose) {
+            for (const [key, value] of Object.entries(event)) {
+                jQuery('<input>').attr({
+                    type: 'hidden',
+                    name: key,
+                    value: value
+                }).appendTo('#udraw-form-data');
+            }
+            jQuery('#udraw-form-data').submit();
+        }
+    }
+
+    function uDrawConnectDesignLoaded(event) {
+        //console.log('uDraw Design Loaded');
+        //console.log(event);
+    }
+</script>
+
+<style>
+    body {
+        margin: 0px;
+    }
+
+    #udraw-connect-container iframe {
+        height: 99.6vh !important;
+    }
+
+    .notices-wrapper, .page-header { display: none; }
+</style>

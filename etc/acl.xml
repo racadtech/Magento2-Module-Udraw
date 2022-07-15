@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Racadtech_Udraw::udraw" title="Udraw" translate="title" sortOrder="20">
+                    <resource id="Racadtech_Udraw::templates" title="Templates" translate="title" sortOrder="10">
+                        <resource id="Racadtech_Udraw::templates_create" title="Create" translate="title" sortOrder="10" />
+                        <resource id="Racadtech_Udraw::templates_delete" title="Delete" translate="title" sortOrder="20" />
+                    </resource>
+                    <resource id="Racadtech_Udraw::pricematrix" title="Price Matrix" translate="title" sortOrder="20">
+                        <resource id="Racadtech_Udraw::pricematrix_create" title="Create" translate="title" sortOrder="10" />
+                        <resource id="Racadtech_Udraw::pricematrix_delete" title="Delete" translate="title" sortOrder="20" />
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

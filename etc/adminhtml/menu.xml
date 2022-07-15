@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Racadtech_Udraw::menu" title="RacadTech W2P" module="Racadtech_Udraw"
+             resource="Racadtech_Udraw::udraw" sortOrder="79" />
+
+        <add id="Racadtech_Udraw::udraw_menu" title="uDraw" module="Racadtech_Udraw"
+             resource="Racadtech_Udraw::templates" sortOrder="0" parent="Racadtech_Udraw::menu" />
+        <add id="Racadtech_Udraw::manage_template" title="uDraw Templates" module="Racadtech_Udraw"
+             resource="Racadtech_Udraw::templates_create" sortOrder="0" parent="Racadtech_Udraw::udraw_menu"
+             action="udraw/templates/index" />
+
+        <add id="Racadtech_Udraw::pricematrix_menu" title="Price Matrix" module="Racadtech_Udraw"
+             resource="Magento_Backend::content" sortOrder="1" parent="Racadtech_Udraw::menu" />
+        <add id="Racadtech_Udraw::manage_pricematrix" title="Manage" module="Racadtech_Udraw"
+             resource="Racadtech_Udraw::pricematrix_create" sortOrder="0" parent="Racadtech_Udraw::pricematrix_menu"
+             action="udraw/pricematrix/index" />
+
+        <add id="Racadtech_Udraw::pricematrix" title="Settings" module="Racadtech_Udraw"
+             resource="Racadtech_Udraw::udraw" sortOrder="90" parent="Racadtech_Udraw::menu"
+             action="udraw/settings/index" />
+    </menu>
+</config>

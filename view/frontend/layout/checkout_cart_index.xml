@@ -1,0 +1,7 @@
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="checkout.cart.items">
+            <block class="Racadtech\Udraw\Block\Checkout\Cart" name="Racadtech.Udraw.checkout.cart" template="checkout/cart.phtml" before="-"/>
+        </referenceContainer>
+    </body>
+</page>

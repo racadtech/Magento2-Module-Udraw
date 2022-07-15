@@ -1,0 +1,53 @@
+<div id="udraw-image-popup-modal" style="display:none; text-align: center;">
+    <img id="udraw-product-popup-image" src=""  alt=""/>
+</div>
+<script type="text/javascript">
+    let udrawUpdatedImages = [];
+    require(['jquery', 'Magento_Ui/js/modal/modal'],function($, modal) {
+        $(document).ready(function() {
+            let modelOptions = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: true,
+                buttons: [{
+                    text: $.mage.__('Close'),
+                    class: 'modal-close',
+                    click: function (){
+                        this.closeModal();
+                    }
+                }]
+            };
+            let modalInstance = modal(modelOptions, $('#udraw-image-popup-modal'));
+
+            //
+            // Creating a setInterval here as images are sometimes "lazy loaded" and image src references are
+            // temporarily a 1x1 pixel base64 reference.  This will allow sufficient time for images to properly
+            // load in before.
+            //
+            let updateImageTaskCounter = 0;
+            let updateImageTask = setInterval(function(){
+                if(updateImageTaskCounter > 5 || (udrawUpdatedImages.length === jQuery('.cart.item img').length)) {
+                    clearInterval(updateImageTask);
+                    return;
+                }
+
+                jQuery('.cart.item img').each(function() {
+                    let element = jQuery(this);
+                    let imageSrc = element.attr('src');
+                    if (imageSrc.indexOf('https://udraw-app.racadtech.com') > -1) {
+                        if (udrawUpdatedImages.filter(i => i === imageSrc).length < 1) {
+                            udrawUpdatedImages.push(imageSrc);
+                            jQuery(element).on('click', function(e) {
+                                e.preventDefault();
+                                jQuery("#udraw-product-popup-image").attr('src', imageSrc);
+                                jQuery('#udraw-image-popup-modal').modal("openModal");
+                            });
+                        }
+                    }
+                });
+
+                updateImageTaskCounter++;
+            }, 1000);
+        });
+    });
+</script>

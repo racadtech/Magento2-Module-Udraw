@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="order_additional_info">
+            <container name="udraw_options_additional_info" htmlTag="div" htmlClass="udraw_options_additional_info">
+                <block name="vieworderudrawoptions.viewmodel" template="Racadtech_Udraw::order/view/udrawoptions.phtml">
+                    <arguments>
+                        <argument name="view_model" xsi:type="object">Racadtech\Udraw\ViewModel\ViewOrderUdrawOptions</argument>
+                    </arguments>
+                </block>
+            </container>
+        </referenceBlock>
+    </body>
+</page>

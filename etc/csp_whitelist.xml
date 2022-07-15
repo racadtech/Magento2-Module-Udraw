@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="udraw-script-src" type="host">udraw-app.racadtech.com</value>
+                <value id="gosendex-script-src" type="host">*.gosendex.com</value>
+                <value id="cdn-cloudflare-src" type="host">cdnjs.cloudflare.com</value>
+            </values>
+        </policy>
+        <policy id="connect-src">
+            <values>
+                <value id="udraw-connect-src" type="host">udraw-app.racadtech.com</value>
+            </values>
+        </policy>
+        <policy id="font-src">
+            <values>
+                <value id="udraw-font-src" type="host">udraw-app.racadtech.com</value>
+            </values>
+        </policy>
+        <policy id="style-src">
+            <values>
+                <value id="udraw-style-src" type="host">udraw-app.racadtech.com</value>
+            </values>
+        </policy>
+        <policy id="default-src">
+            <values>
+                <value id="udraw-default-src" type="host">udraw-app.racadtech.com</value>
+            </values>
+        </policy>
+        <policy id="frame-src">
+            <values>
+                <value id="udraw-frame-src" type="host">udraw-app.racadtech.com</value>
+                <value id="udraw-frame-mailto" type="host">mailto:</value>
+                <value id="udraw-frame-tel" type="host">tel:</value>
+            </values>
+        </policy>
+        <policy id="img-src">
+            <values>
+                <value id="udraw-img-src" type="host">udraw-app.racadtech.com</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>
